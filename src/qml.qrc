@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+	    <file>../resources/main.qml</file>
+		<file>../resources/bq.ico</file>
+	</qresource>
+</RCC>
