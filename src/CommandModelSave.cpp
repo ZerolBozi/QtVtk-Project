@@ -15,6 +15,7 @@ bool CommandModelSave::isReady() const
 
 void CommandModelSave::saveModel()
 {
+	// 呼叫Model存檔
 	qDebug() << m_modelPath;
 	m_model->saveModel(m_modelPath);
 }

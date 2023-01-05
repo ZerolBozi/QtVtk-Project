@@ -22,7 +22,14 @@ class QVTKFramebufferObjectItem : public QQuickFramebufferObject
 	Q_OBJECT
 
 public:
+	// Class 入口函數
 	QVTKFramebufferObjectItem();
+
+	// 知識點:
+	// overload(重載) override(重寫/覆蓋)
+	// 重載要求函數名相同，但是參數列表必須不同，返回值可以相同也可以不同
+	// 覆蓋要求函數名、參數列表、返回值必須相同
+	// Q_DECL_OVERRIDE == override 在重寫虛函數時會用到，作用是防止寫錯虛函數
 
 	Renderer *createRenderer() const Q_DECL_OVERRIDE;
 	void setVtkFboRenderer(QVTKFramebufferObjectRenderer*);
@@ -134,7 +141,9 @@ private:
 	QVTKFramebufferObjectRenderer *m_vtkFboRenderer = nullptr;
 	std::shared_ptr<ProcessingEngine> m_processingEngine;
 
+	// 任務佇列
 	std::queue<CommandModel*> m_commandsQueue;
+	// 任務互斥鎖
 	std::mutex m_commandsQueueMutex;
 
 	std::shared_ptr<QMouseEvent> m_lastMouseLeftButton;

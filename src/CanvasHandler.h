@@ -12,6 +12,12 @@ class QVTKFramebufferObjectItem;
 class CanvasHandler : public QObject
 {
 	Q_OBJECT
+	// QT宏，繼承於QObject類，設定一些窗口屬性還有回調函數
+
+	// 利用Q_PROPERTY可以將變數傳輸到QML上， Q_PROPERTY必須繼承於Q_OBJECT類
+	// Q_RROPERTY(類型, 屬性名稱, 方法(Read, Write, Member), 回調函數)
+	// 沒有使用到Read，可以使用Member來去使用Q_PROPERTY，後面為自己的變數
+	// NOTIFY 後面是一個Signal回調函數，當值改變時，需要emit傳輸自己的信號
 
 	Q_PROPERTY(bool showFileDialog MEMBER m_showFileDialog NOTIFY showFileDialogChanged)
 	Q_PROPERTY(bool showSaveFileDialog MEMBER m_showSaveFileDialog NOTIFY showFileDialogChanged)
@@ -38,8 +44,10 @@ class CanvasHandler : public QObject
 	Q_PROPERTY(int modelCount READ getModelCount NOTIFY isModelCountChanged)
 
 public:
+	// Class入口函數
 	CanvasHandler(int argc, char **argv);
 
+	// 簡單理解的話，Q_INVOKABLE是qml窗口程式碼與C++交互的一個方式，也就是說窗口程式碼那裡可以呼叫這裡的函數，進行回調
 	Q_INVOKABLE void showPlatform(const bool checked) const;
 	Q_INVOKABLE void showAxes(const bool checked) const;
 	Q_INVOKABLE void createCube(const QString x, const QString y, const QString z) const;

@@ -37,6 +37,8 @@ const std::shared_ptr<Model> &ProcessingEngine::addModel(const QUrl &modelFilePa
 	vtkSmartPointer<vtkXMLPolyDataReader> vtpReader = vtkSmartPointer<vtkXMLPolyDataReader>::New();
     vtkSmartPointer<vtkPolyData> inputData;
 
+	// 根據不同檔案類型，使用不同reader
+
 	if (modelFilePathExtension == "obj")
 	{
 		// Read OBJ file
@@ -88,6 +90,7 @@ const std::shared_ptr<Model> &ProcessingEngine::addModels(const QList<QUrl> &mod
 	vtkSmartPointer<vtkAppendPolyData> appendFilter = vtkSmartPointer<vtkAppendPolyData>::New();
 	vtkSmartPointer<vtkCleanPolyData> cleanFilter = vtkSmartPointer<vtkCleanPolyData>::New();
 
+	// 把模型合併成一個
 	for (int i = 0; i < modelFilesPath.length(); i++)
 	{
 		QString modelFilePathExtension = QFileInfo(modelFilesPath[i].toString()).suffix().toLower();
@@ -147,6 +150,7 @@ const std::shared_ptr<Model> &ProcessingEngine::addModels(const QList<QUrl> &mod
 
 const std::shared_ptr<Model> &ProcessingEngine::createCube(const double x, const double y, const double z)
 {
+	// 生成立方體
 	qDebug() << "ProcessingEngine::createCube()";
 	vtkSmartPointer<vtkCubeSource> cube = vtkSmartPointer<vtkCubeSource>::New();
 	cube->SetXLength(x);
@@ -162,6 +166,7 @@ const std::shared_ptr<Model> &ProcessingEngine::createCube(const double x, const
 
 const std::shared_ptr<Model> &ProcessingEngine::createSphare(const double radius)
 {
+	// 生成球體
 	qDebug() << "ProcessingEngine::createSphare()";
 	vtkSmartPointer<vtkSphereSource> sphereSource = vtkSmartPointer<vtkSphereSource>::New();
 	sphereSource->SetRadius(radius);
@@ -176,6 +181,8 @@ const std::shared_ptr<Model> &ProcessingEngine::createSphare(const double radius
 
 vtkSmartPointer<vtkPolyData> ProcessingEngine::preprocessPolydata(const vtkSmartPointer<vtkPolyData> inputData) const
 {
+	// 預處理PolyData
+	// 設定模型位置
 	// Center the polygon
 	double center[3];
 	inputData->GetCenter(center);
@@ -200,10 +207,11 @@ vtkSmartPointer<vtkPolyData> ProcessingEngine::preprocessPolydata(const vtkSmart
 void ProcessingEngine::placeModel(Model &model) const
 {
 	qDebug() << "ProcessingEngine::placeModel()";
-
+	// 將模型設定在原點0,0
 	model.translateToPosition(0, 0);
 }
 
+// 舊功能函數，原作者使用的，沒刪除
 void ProcessingEngine::setModelsRepresentation(const int modelsRepresentationOption) const
 {
 	for (const std::shared_ptr<Model>& model : m_models)

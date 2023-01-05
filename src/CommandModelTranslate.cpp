@@ -19,6 +19,7 @@ bool CommandModelTranslate::isReady() const
 
 void CommandModelTranslate::transformCoordinates()
 {
+	// 設定x,y
 	std::array<double, 3> worldCoordinates;
 
 	if (m_translateParams.reset)
@@ -28,6 +29,7 @@ void CommandModelTranslate::transformCoordinates()
 	}
 	else if (m_vtkFboRenderer->screenToWorld(m_translateParams.screenX, m_translateParams.screenY, worldCoordinates.data()))
 	{
+		// 設定計算好的坐標
 		m_translateParams.targetPositionX = worldCoordinates[0] - m_translateParams.model->getMouseDeltaX();
 		m_translateParams.targetPositionY = worldCoordinates[1] - m_translateParams.model->getMouseDeltaY();
 	}
@@ -47,7 +49,7 @@ void CommandModelTranslate::execute()
 	{
 		this->transformCoordinates();
 	}
-
+	// 移動模型
 	m_translateParams.model->translateToPosition(m_translateParams.targetPositionX, m_translateParams.targetPositionY);
 }
 

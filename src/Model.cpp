@@ -11,13 +11,13 @@
 
 #include "Model.h"
 
-
 QColor Model::m_defaultModelColor = QColor{"#ffffff"};
 QColor Model::m_selectedModelColor = QColor{"#ff0000"}; // Red
 
 Model::Model(vtkSmartPointer<vtkPolyData> modelData)
 	: m_modelData{modelData}
 {
+	// 串連filter -> setMapper -> setActor
 	// Place model with lower Z bound at zero
 	m_positionZ = -m_modelData->GetBounds()[4];
 
@@ -122,6 +122,7 @@ double Model::getPositionY()
 
 void Model::getModelData()
 {
+	// 取得模型數據，並將數據設定在檔案變數
 	// representation
 	int t_representation = m_modelActor->GetProperty()->GetRepresentation();
 	if (t_representation != m_Representation)
@@ -277,6 +278,7 @@ void Model::setSelected(const bool selected)
 
 void Model::saveModel(const QUrl modelPath)
 {
+	// 另存模型
 	QString modelFilePathExtension = QFileInfo(modelPath.toString()).suffix().toLower();
 
 	vtkSmartPointer<vtkSTLWriter> stlWriter = vtkSmartPointer<vtkSTLWriter>::New();
@@ -324,6 +326,7 @@ void Model::setModelRepresentation(const int modelsRepresentationOption)
 {
 	if (modelsRepresentationOption != m_Representation)
 	{
+		// 功能被使用了，所以數值不同，設定完功能後emit
 		m_Representation = modelsRepresentationOption;
 		m_modelActor->GetProperty()->SetRepresentation(m_Representation);
 		emit modelRepresentationChanged(m_Representation);
@@ -334,6 +337,8 @@ void Model::setModelDecreasePolygons(const double modelPolygons)
 {
 	if (modelPolygons != m_TargetReduction)
 	{
+		// 功能被使用了，所以數值不同，設定完功能後emit
+		// Filter跟Mapper要Update更新一下
 		m_TargetReduction = modelPolygons;
 		m_modelDecimation->SetTargetReduction(m_TargetReduction);
 		m_modelDecimation->Update();
@@ -348,6 +353,8 @@ void Model::setModelIncreasePolygons(const int iterations)
 {
 	if (iterations != m_Iterations)
 	{
+		// 功能被使用了，所以數值不同，設定完功能後emit
+		// Filter跟Mapper要Update更新一下
 		m_Iterations = iterations;
 		m_modelLoopFilter->SetNumberOfSubdivisions(iterations);
 		m_modelLoopFilter->Update();
@@ -362,6 +369,7 @@ void Model::setModelOpacity(const double modelsOpacity)
 {
 	if (modelsOpacity != m_Opacity)
 	{
+		// 功能被使用了，所以數值不同，設定完功能後emit
 		m_Opacity = modelsOpacity;
 		m_modelActor->GetProperty()->SetOpacity(m_Opacity);
 		emit modelOpacityChanged(m_Opacity);
@@ -381,12 +389,14 @@ void Model::setModelGouraudInterpolation(const bool enableGouraudInterpolation)
 		{
 			m_modelActor->GetProperty()->SetInterpolationToFlat();
 		}
+		// 功能被使用了，所以數值不同，設定完功能後emit
 		emit modelGIChanged(m_GI);
 	}
 }
 
 void Model::setModelColor(const QColor &color)
 {
+	// 功能被使用了，所以數值不同，設定完功能後emit
 	if (color.red() != m_colorR)
 	{
 		m_colorR = color.red();
@@ -407,9 +417,10 @@ void Model::setModelColor(const QColor &color)
 
 void Model::setModelSmooth(const int value)
 {
-	
 	if (value != m_Smooth)
 	{
+		// 功能被使用了，所以數值不同，設定完功能後emit
+		// Filter跟Mapper要Update更新一下
 		m_Smooth = value;
 		m_modelSmoothFilter->SetNumberOfIterations(m_Smooth);
 		m_modelSmoothFilter->Update();
@@ -461,6 +472,8 @@ void Model::setMouseDeltaXY(const double deltaX, const double deltaY)
 	m_mouseDeltaX = deltaX;
 	m_mouseDeltaY = deltaY;
 }
+
+// 返回模型數據給handler
 
 int Model::getModelRepresentation()
 {

@@ -15,6 +15,7 @@ bool CommandModelActor::isReady() const
 
 void CommandModelActor::setActor()
 {
+	// 判斷功能模式，接著去model呼叫實際的功能函數
 	if (m_actorParams.mode == "setModelRepresentation")
 	{
 		m_actorParams.model->setModelRepresentation(m_actorParams.valueI);
@@ -47,5 +48,6 @@ void CommandModelActor::setActor()
 
 void CommandModelActor::execute()
 {
+	// 先執行這裡，再去setActor
 	this->setActor();
 }

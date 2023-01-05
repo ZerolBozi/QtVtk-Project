@@ -102,6 +102,9 @@ void QVTKFramebufferObjectRenderer::synchronize(QQuickFramebufferObject *item)
 		m_vtkFboItem->getLastWheelEvent()->accept();
 	}
 	
+	// 只要渲染器刷新，這裡的processing engine的功能就會自動執行
+	// 因為不需要了，所以註解掉了
+	
 	// Get extra data
 	//m_modelsRepresentationOption = m_vtkFboItem->getModelsRepresentation();
 	//m_modelsOpacity = m_vtkFboItem->getModelsOpacity();
@@ -133,12 +136,12 @@ void QVTKFramebufferObjectRenderer::render()
 
 		if (m_mouseEvent->type() == QEvent::MouseButtonPress)
 		{
-			// 把右鍵改為原本左鍵的功能
+			// 把右鍵改為原本vtk左鍵的功能
 			m_vtkRenderWindowInteractor->InvokeEvent(vtkCommand::LeftButtonPressEvent, m_mouseEvent.get());
 		}
 		else if (m_mouseEvent->type() == QEvent::MouseButtonRelease)
 		{
-			// 把右鍵改為原本左鍵的功能
+			// 把右鍵改為原本vtk左鍵的功能
 			m_vtkRenderWindowInteractor->InvokeEvent(vtkCommand::LeftButtonReleaseEvent, m_mouseEvent.get());
 		}
 
@@ -155,7 +158,7 @@ void QVTKFramebufferObjectRenderer::render()
 																  (m_moveEvent->modifiers() & Qt::ShiftModifier) > 0 ? 1 : 0, 0,
 																  m_moveEvent->type() == QEvent::MouseButtonDblClick ? 1 : 0);
 
-			// 把右鍵移動改為原本左鍵移動的功能
+			// 把右鍵移動改為原本vtk左鍵移動的功能
 			m_vtkRenderWindowInteractor->InvokeEvent(vtkCommand::MouseMoveEvent, m_moveEvent.get());
 		}
 
@@ -163,6 +166,7 @@ void QVTKFramebufferObjectRenderer::render()
 	}
 
 	// Process wheel event
+	// 滾輪單純重載
 	if (m_wheelEvent && !m_wheelEvent->isAccepted())
 	{
 		if (m_wheelEvent->delta() > 0)
@@ -189,6 +193,7 @@ void QVTKFramebufferObjectRenderer::render()
 	
 	// Model transformations
 
+	// 任務執行，只要刷新渲染器這裡會自動執行任務
 	CommandModel *command;
 	while (!m_vtkFboItem->isCommandsQueueEmpty())
 	{
@@ -256,6 +261,7 @@ QOpenGLFramebufferObject *QVTKFramebufferObjectRenderer::createFramebufferObject
 
 void QVTKFramebufferObjectRenderer::initScene()
 {
+	// 場景初始化
 	qDebug() << "QVTKFramebufferObjectRenderer::initScene()";
 
 	m_vtkRenderWindow->SetOffScreenRendering(true);
@@ -274,7 +280,7 @@ void QVTKFramebufferObjectRenderer::initScene()
 	m_renderer->SetBackground2(r1, g1, b1);
 	m_renderer->GradientBackgroundOn();
 
-	// Axes
+	// Axes 坐標軸
 	m_axes = vtkSmartPointer<vtkAxesActor>::New();
 	double axes_length = 20.0;
 	int16_t axes_label_font_size = 20;
@@ -315,7 +321,7 @@ void QVTKFramebufferObjectRenderer::generatePlatform()
 	m_platformModelActor->PickableOff();
 	m_renderer->AddActor(m_platformModelActor);
 
-	// Platform Grid
+	// Platform Grid 平台
 	m_platformGrid = vtkSmartPointer<vtkPolyData>::New();
 
 	vtkSmartPointer<vtkPolyDataMapper> platformGridMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
@@ -382,9 +388,13 @@ void QVTKFramebufferObjectRenderer::createLine(const double x1, const double y1,
 
 void QVTKFramebufferObjectRenderer::addModelActor(const std::shared_ptr<Model> model)
 {
+	// 幫模型新增actor
 	m_renderer->AddActor(model->getModelActor());
+	// 設定臨時actor，用於map
 	m_tmpAddActor = model->getModelActor();
+	// 模型計數器
 	m_modelCount += 1;
+	// emit 信號
 	emit isModelCountChanged(m_modelCount);
 	qDebug() << "QVTKFramebufferObjectRenderer::addModelActor(): Model added " << model.get();
 }
@@ -428,6 +438,7 @@ void QVTKFramebufferObjectRenderer::selectModel(const int16_t x, const int16_t y
 	{
 		qDebug() << "QVTKFramebufferObjectRenderer::selectModel(): picked actor" << m_selectedActor;
 
+		// 於map中取得模型的路徑
 		auto iter = m_fileNameMap.find(m_selectedActor);
 		if (iter != m_fileNameMap.end())
 		{
@@ -452,15 +463,18 @@ void QVTKFramebufferObjectRenderer::selectModel(const int16_t x, const int16_t y
 					}
 					m_modelPath.remove(QRegExp("\\s* +$"));
 				}
+				// 傳輸信號到qml
 				emit isModelFileNameChanged(m_modelPath);
 			}
 		}
 		
 		m_selectedModel->setSelected(true);
 
+		// 去Model取得模型數據
 		m_selectedModel->getModelData();
 
 		// Connect signals
+		// 建立與Model檔案的連線
 		connect(m_selectedModel.get(), &Model::positionXChanged, this, &QVTKFramebufferObjectRenderer::setSelectedModelPositionX);
 		connect(m_selectedModel.get(), &Model::positionYChanged, this, &QVTKFramebufferObjectRenderer::setSelectedModelPositionY);
 		connect(m_selectedModel.get(), &Model::modelRepresentationChanged, this, &QVTKFramebufferObjectRenderer::setSelectedModelRepresentation);
@@ -475,6 +489,7 @@ void QVTKFramebufferObjectRenderer::selectModel(const int16_t x, const int16_t y
 		connect(m_selectedModel.get(), &Model::modelPolygonsChanged, this, &QVTKFramebufferObjectRenderer::setSelectedModelPolygons);
 		connect(m_selectedModel.get(), &Model::modelPointsChanged, this, &QVTKFramebufferObjectRenderer::setSelectedModelPoints);
 
+		// 設定模型功能數據
 		this->setSelectedModelPositionX(m_selectedModel->getPositionX());
 		this->setSelectedModelPositionY(m_selectedModel->getPositionY());
 		this->setSelectedModelRepresentation(m_selectedModel->getModelRepresentation());
@@ -494,6 +509,7 @@ void QVTKFramebufferObjectRenderer::selectModel(const int16_t x, const int16_t y
 		this->setSelectedModelMaxAreaOfCell(m_selectedModel->getModelMaxAreaOfCell());
 		this->setSelectedModelMinAreaOfCell(m_selectedModel->getModelMinAreaOfCell());
 
+		// 被選擇的模型，新增外框線
 		m_renderer->AddActor(m_selectedModel->getModelOutlineActor());
 
 		this->setIsModelSelected(true);
@@ -515,6 +531,7 @@ void QVTKFramebufferObjectRenderer::clearSelectedModel(int param)
 
 	m_selectedModel->setSelected(false);
 
+	// 斷開與Model的連線
 	disconnect(m_selectedModel.get(), &Model::positionXChanged, this, &QVTKFramebufferObjectRenderer::setSelectedModelPositionX);
 	disconnect(m_selectedModel.get(), &Model::positionYChanged, this, &QVTKFramebufferObjectRenderer::setSelectedModelPositionY);	
 	disconnect(m_selectedModel.get(), &Model::modelRepresentationChanged, this, &QVTKFramebufferObjectRenderer::setSelectedModelRepresentation);
@@ -531,6 +548,8 @@ void QVTKFramebufferObjectRenderer::clearSelectedModel(int param)
 
 	if (!param)
 	{
+		// 當模型刪除後，清除信號也清除指標
+		// 指標設定為空指標
 		m_selectedModel = nullptr;
 		m_selectedActor = nullptr;
 	}
@@ -538,6 +557,7 @@ void QVTKFramebufferObjectRenderer::clearSelectedModel(int param)
 
 void QVTKFramebufferObjectRenderer::showPlatform(const bool checked)
 {
+	// 顯示平台
 	if (checked)
 	{
 		m_renderer->AddActor(m_platformModelActor);
@@ -553,6 +573,7 @@ void QVTKFramebufferObjectRenderer::showPlatform(const bool checked)
 
 void QVTKFramebufferObjectRenderer::showAxes(const bool checked)
 {
+	// 顯示坐標軸
 	if (checked)
 	{
 		m_renderer->AddActor(m_axes);
@@ -565,8 +586,12 @@ void QVTKFramebufferObjectRenderer::showAxes(const bool checked)
 
 void QVTKFramebufferObjectRenderer::closeModel()
 {
+	// 有選擇模型的話
 	if (m_selectedModel != nullptr && m_selectedActor != nullptr)
 	{
+		// 移除actor
+		// 從fileNameMap中移除模型路徑數據
+		// 還有一些基本的設定，保持平衡
 		m_renderer->RemoveActor(m_selectedModel->getModelOutlineActor());
 		size_t delete_s = m_fileNameMap.erase(m_selectedActor);
 		qDebug() << "QVTKFramebufferObjectRenderer::closeModel() delete map code: " << delete_s;
@@ -576,13 +601,16 @@ void QVTKFramebufferObjectRenderer::closeModel()
 		m_selectedModel = nullptr;
 		m_selectedActor = nullptr;
 		m_modelCount -= 1;
+		// 傳輸信號
 		emit isModelCountChanged(m_modelCount);
 	}
 }
 
 void QVTKFramebufferObjectRenderer::closeAllModel(std::vector<std::shared_ptr<Model>> models)
 {
+	// 先關閉被選擇的模型
 	this->closeModel();
+	// 將剩餘的模型進行關閉
 	for (const std::shared_ptr<Model> &model : models)
 	{
 		m_renderer->RemoveActor(model->getModelActor());
@@ -642,6 +670,8 @@ void QVTKFramebufferObjectRenderer::setSelectedModelPositionY(const double posit
 		emit selectedModelPositionYChanged();
 	}
 }
+
+// 返回數據
 
 double QVTKFramebufferObjectRenderer::getSelectedModelPositionX() const
 {
@@ -738,6 +768,7 @@ int QVTKFramebufferObjectRenderer::getModelCount() const
 	return m_modelCount;
 }
 
+// 設定該檔案的變數值，數值改變時emit信號
 void QVTKFramebufferObjectRenderer::setSelectedModelRepresentation(const int option)
 {
 	if (m_modelRepresentation != option)
@@ -884,7 +915,8 @@ void QVTKFramebufferObjectRenderer::setSelectedModelMinAreaOfCell(const double m
 
 const bool QVTKFramebufferObjectRenderer::screenToWorld(const int16_t screenX, const int16_t screenY, double worldPos[])
 {
-	//Create bounding planes for projection plane
+	// 相機的算法
+	// Create bounding planes for projection plane
 	vtkSmartPointer<vtkPlane> boundingPlanes[4];
 
 	boundingPlanes[0] = vtkSmartPointer<vtkPlane>::New();
@@ -933,6 +965,7 @@ const bool QVTKFramebufferObjectRenderer::screenToWorld(const int16_t screenX, c
 
 void QVTKFramebufferObjectRenderer::setModelFilePathToMap(QUrl path)
 {
+	// 將模型路徑丟入map中
 	if (m_tmpAddActor != nullptr)
 	{
 		auto iter = m_fileNameMap.find(m_tmpAddActor);
@@ -945,6 +978,7 @@ void QVTKFramebufferObjectRenderer::setModelFilePathToMap(QUrl path)
 
 void QVTKFramebufferObjectRenderer::resetCamera()
 {
+	// 重置攝影機
 	// Seting the clipping range here messes with the opacity of the actors prior to moving the camera
 	m_camPositionX = -237.885;
 	m_camPositionY = -392.348;

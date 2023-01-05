@@ -18,10 +18,12 @@ void CommandModelAdd::run()
 
 	if (m_modelPaths.length() == 1)
 	{
+		// 導入模型
 		m_model = m_processingEngine->addModel(m_modelPaths[0]);
 	}
 	else if (m_modelPaths.length() > 1)
 	{
+		// 合併模型
 		m_model = m_processingEngine->addModels(m_modelPaths);
 	}
 
@@ -43,6 +45,7 @@ void CommandModelAdd::execute()
 
 	m_vtkFboRenderer->addModelActor(m_model);
 
+	// 調用renderer的setModelFilePathToMap，設定模型檔案路徑
 	if (m_modelPaths.length() == 1)
 	{
 		m_vtkFboRenderer->setModelFilePathToMap(m_modelPaths[0]);
