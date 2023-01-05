@@ -123,6 +123,21 @@ ApplicationWindow {
             onClicked: canvasHandler.closeModel()
         }
 
+        Button {
+            id: closeAllFileButton
+            visible: !canvasHandler.isModelSelected
+            text: "清空模型"
+            Material.background: Material.Red
+            Material.foreground: "#ffffff"
+            font.pixelSize: 16
+            font.bold: true
+
+            anchors.right: parent.right
+            anchors.bottom: resetButton.bottom
+            anchors.margins: 50
+            onClicked: canvasHandler.closeAllModel()
+        }
+
         Switch {
             id: platformSwitch
             text: "顯示平台"
@@ -239,21 +254,6 @@ ApplicationWindow {
 
             onActivated: canvasHandler.setModelRepresentation(currentIndex);
         }
-        /*
-        ComboBox {
-            id: warpCombobox
-            visible: canvasHandler.isModelSelected
-            width: 200
-            model: ["原始模型", "變形", "初始輪廓+變形"]
-            currentIndex: 0
-            anchors.left: parent.left
-            anchors.top: representationCombobox.bottom
-            anchors.leftMargin: 40
-            anchors.topMargin: 5
-
-            //onActivated: canvasHandler.setModelRepresentation(currentIndex);
-        }
-        */
 
         Label {
             id: decreasePolygonsLabel
@@ -579,6 +579,19 @@ ApplicationWindow {
             anchors.left: parent.left
             anchors.leftMargin: 40
             anchors.bottomMargin: 10
+        }
+
+        Label{
+            id: modelCountLabel
+            visible: !canvasHandler.isModelSelected && canvasHandler.modelCount >= 1
+            color: "#333333"
+            text: "目前已載入" + canvasHandler.modelCount + "個模型"
+            font.pixelSize: 18
+            font.bold: true
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.leftMargin: 40
+            anchors.bottomMargin: 20
         }
     }
 
