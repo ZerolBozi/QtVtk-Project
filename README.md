@@ -7,6 +7,8 @@ The project reference is at https://github.com/nicanor-romero/QtVtk
 
 And code was tested on Windows with Qt 5.9.4 and VTK 8.2.0.
 
+![Interface](resources/QtVtk.png "Interface")
+
 ## Build example (bash)
 
 ```bash
